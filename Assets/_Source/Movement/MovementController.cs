@@ -1,9 +1,4 @@
-﻿using Player;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Movement
+﻿namespace Movement
 {
     public class MovementController
     {
@@ -19,5 +14,4 @@ namespace Movement
             view.SetDirection(direction);
         }
     }
-    
 }

@@ -5,15 +5,17 @@ namespace Level
 {
     public class Node : MonoBehaviour
     {
-        public bool canMoveLeft = false;
-        public bool canMoveRight = false;
-        public bool canMoveUp = false;
-        public bool canMoveDown = false;
+        [field: SerializeField] public bool CanMoveLeft { get; private set; } = false;
+        [field: SerializeField] public bool CanMoveRight { get; private set; } = false;
+        [field: SerializeField] public bool CanMoveUp { get; private set; } = false;
+        [field: SerializeField] public bool CanMoveDown { get; private set; } = false;
 
-        public GameObject nodeLeft;
-        public GameObject nodeRight;
-        public GameObject nodeUp;
-        public GameObject nodeDown;
+        [field: SerializeField] public GameObject NodeLeft { get; private set; }
+        [field: SerializeField] public GameObject NodeRight { get; private set; }
+        [field: SerializeField] public GameObject NodeUp { get; private set; }
+        [field: SerializeField] public GameObject NodeDown { get; private set; }
+
+        [SerializeField] private bool visualizeNodes;
 
         private void Start()
         {
@@ -22,10 +24,11 @@ namespace Level
             for(int i = 0; i < hitsDown.Length; i++)
             {
                 float distance = Mathf.Abs(hitsDown[i].point.y - transform.position.y);
-                if (distance < 0.35f)
+                if (distance < 1.05f && hitsDown[i].collider.TryGetComponent(out Node node))
                 {
-                    canMoveDown = true;
-                    nodeDown = hitsDown[i].collider.gameObject;
+                    CanMoveDown = true;
+                    NodeDown = hitsDown[i].collider.gameObject;
+                    break;
                 }
             }
 
@@ -34,10 +37,11 @@ namespace Level
             for (int i = 0; i < hitsUp.Length; i++)
             {
                 float distance = Mathf.Abs(hitsUp[i].point.y - transform.position.y);
-                if (distance < 0.35f)
+                if (distance < 1.05f && hitsUp[i].collider.TryGetComponent(out Node node))
                 {
-                    canMoveUp = true;
-                    nodeUp = hitsUp[i].collider.gameObject;
+                    CanMoveUp = true;
+                    NodeUp = hitsUp[i].collider.gameObject;
+                    break;
                 }
             }
 
@@ -46,10 +50,11 @@ namespace Level
             for (int i = 0; i < hitsRight.Length; i++)
             {
                 float distance = Mathf.Abs(hitsRight[i].point.x - transform.position.x);
-                if (distance < 0.35f)
+                if (distance < 1.05f && hitsRight[i].collider.TryGetComponent(out Node node))
                 {
-                    canMoveRight = true;
-                    nodeRight = hitsRight[i].collider.gameObject;
+                    CanMoveRight = true;
+                    NodeRight = hitsRight[i].collider.gameObject;
+                    break;
                 }
             }
 
@@ -58,20 +63,25 @@ namespace Level
             for (int i = 0; i < hitsLeft.Length; i++)
             {
                 float distance = Mathf.Abs(hitsLeft[i].point.x - transform.position.x);
-                if (distance < 0.35f)
+                if (distance < 1.05f && hitsLeft[i].collider.TryGetComponent(out Node node))
                 {
-                    canMoveLeft = true;
-                    nodeLeft = hitsLeft[i].collider.gameObject;
+                    CanMoveLeft = true;
+                    NodeLeft = hitsLeft[i].collider.gameObject;
+                    break;
                 }
             }
+
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            if (visualizeNodes) spriteRenderer.enabled = true;
+            else spriteRenderer.enabled = false;
         }
 
         public GameObject GetNodeFromDirection(Direction direction)
         {
-            if(direction == Direction.Up && canMoveUp) return nodeUp;
-            else if(direction == Direction.Right && canMoveRight) return nodeRight;
-            else if(direction == Direction.Down && canMoveDown) return nodeDown;
-            else if (direction == Direction.Left && canMoveLeft) return nodeLeft;
+            if(direction == Direction.Up && CanMoveUp) return NodeUp;
+            else if(direction == Direction.Right && CanMoveRight) return NodeRight;
+            else if(direction == Direction.Down && CanMoveDown) return NodeDown;
+            else if (direction == Direction.Left && CanMoveLeft) return NodeLeft;
             else return null;
         }
     }

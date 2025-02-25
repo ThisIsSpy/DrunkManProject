@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e11ae159b9a3464e9e6f12f3f2f04a5, type: 3}
+  m_Name: DrinkPowerUpSO
+  m_EditorClassIdentifier: 
+  <ScoreGivenOnPickUp>k__BackingField: 50
+  <PowerUpSprite>k__BackingField: {fileID: 21300000, guid: 1f381d18b4b8b9d49bef2edae49d0960, type: 3}
+  <PickUpSFX>k__BackingField: {fileID: 8300000, guid: a098b5b3dc51df54088e6b1cae3468d1, type: 3}

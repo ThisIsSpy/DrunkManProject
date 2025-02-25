@@ -22,7 +22,7 @@ namespace Movement
             view = GetComponent<MovementView>();
             if(startingNode == null) startingNode = FindFirstObjectByType<Node>();
             gameObject.transform.position = startingNode.transform.position;
-            view.Construct(sprites, GetComponent<SpriteRenderer>(), startingNode.gameObject, model);
+            view.Construct(sprites, GetComponent<SpriteRenderer>(), startingNode.gameObject, model, !IsPlayer);
             controller = new(view);
         }
 
