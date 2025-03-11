@@ -1,9 +1,10 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Score
 {
-    public class ScoreController : IDisposable
+    public class ScoreController
     {
         private readonly ScoreModel model;
         private readonly ScoreView view;
@@ -20,16 +21,26 @@ namespace Score
             model.AllPowerUpsCollected += OnAllPowerUpsCollected;
         }
 
-        public void Dispose()
-        {
-            model.AllPowerUpsCollected -= OnAllPowerUpsCollected;
-        }
-
-        public void InvokeScoreUpdate(int score)
+        public void InvokeScoreUpdate(int score, bool updatePowerUpsCount)
         {
             model.Score += score;
-            model.PowerUpsLeft--;
+            if(updatePowerUpsCount)
+            {
+                model.PowerUpsLeft--;
+                model.PowerUpsEatenInThisLife++;
+            }
             view.UpdateScoreUI(model.Score);
+        }
+
+        public void InvokeScoreUpdateFromEatingGhosts()
+        {
+            InvokeScoreUpdate(model.GhostEatingScore*model.GhostEatingMult, false);
+            model.GhostEatingMult++;
+        }
+
+        public void InvokeResetPowerUpsEatenInThisLife()
+        {
+            model.PowerUpsEatenInThisLife = 0;
         }
 
         public void OnAllPowerUpsCollected()

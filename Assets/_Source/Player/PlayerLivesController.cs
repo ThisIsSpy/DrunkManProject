@@ -4,8 +4,8 @@ namespace Player
 {
     public class PlayerLivesController
     {
-        private PlayerLivesModel model;
-        private PlayerLivesView view;
+        private readonly PlayerLivesModel model;
+        private readonly PlayerLivesView view;
 
         public PlayerLivesController(PlayerLivesModel model, PlayerLivesView view)
         {
@@ -18,6 +18,7 @@ namespace Player
         public void InvokeLivesUpdate(int livesRemoved)
         {
             model.Lives -= livesRemoved;
+            if (livesRemoved < 0 && !model.HadDiedOnThisLevel) model.HadDiedOnThisLevel = true;
             view.UpdateLivesUI(model.Lives);
         }
 

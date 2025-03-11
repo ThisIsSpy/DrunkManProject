@@ -5,6 +5,8 @@ namespace Level
 {
     public class Node : MonoBehaviour
     {
+        [field: SerializeField] public bool IsGhostNode { get; private set; } = false;
+
         [field: SerializeField] public bool CanMoveLeft { get; private set; } = false;
         [field: SerializeField] public bool CanMoveRight { get; private set; } = false;
         [field: SerializeField] public bool CanMoveUp { get; private set; } = false;
@@ -24,7 +26,7 @@ namespace Level
             for(int i = 0; i < hitsDown.Length; i++)
             {
                 float distance = Mathf.Abs(hitsDown[i].point.y - transform.position.y);
-                if (distance < 1.05f && hitsDown[i].collider.TryGetComponent(out Node node))
+                if (distance < 1.05f && hitsDown[i].collider.TryGetComponent(out Node _))
                 {
                     CanMoveDown = true;
                     NodeDown = hitsDown[i].collider.gameObject;
@@ -37,7 +39,7 @@ namespace Level
             for (int i = 0; i < hitsUp.Length; i++)
             {
                 float distance = Mathf.Abs(hitsUp[i].point.y - transform.position.y);
-                if (distance < 1.05f && hitsUp[i].collider.TryGetComponent(out Node node))
+                if (distance < 1.05f && hitsUp[i].collider.TryGetComponent(out Node _))
                 {
                     CanMoveUp = true;
                     NodeUp = hitsUp[i].collider.gameObject;
@@ -50,7 +52,7 @@ namespace Level
             for (int i = 0; i < hitsRight.Length; i++)
             {
                 float distance = Mathf.Abs(hitsRight[i].point.x - transform.position.x);
-                if (distance < 1.05f && hitsRight[i].collider.TryGetComponent(out Node node))
+                if (distance < 1.05f && hitsRight[i].collider.TryGetComponent(out Node _))
                 {
                     CanMoveRight = true;
                     NodeRight = hitsRight[i].collider.gameObject;
@@ -63,7 +65,7 @@ namespace Level
             for (int i = 0; i < hitsLeft.Length; i++)
             {
                 float distance = Mathf.Abs(hitsLeft[i].point.x - transform.position.x);
-                if (distance < 1.05f && hitsLeft[i].collider.TryGetComponent(out Node node))
+                if (distance < 1.05f && hitsLeft[i].collider.TryGetComponent(out Node _))
                 {
                     CanMoveLeft = true;
                     NodeLeft = hitsLeft[i].collider.gameObject;

@@ -1,23 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Movement{
+namespace Movement
+{
     
     public class MovementModel
     {
-        private int speed;
+        private float currentSpeed;
+        private float afraidSpeed;
+        private float normalSpeed;
 
-        public int Speed { get { return speed; } 
-            private set 
+        public float CurrentSpeed { get { return currentSpeed; } 
+            set 
             {
-                speed = Mathf.Clamp(value, 0, 10);
+                currentSpeed = Mathf.Clamp(value, 0, 10);
             } 
         }
+        public float AfraidSpeed { get { return afraidSpeed; } private set { afraidSpeed = Mathf.Clamp(value, 0, NormalSpeed); } }
+        public float NormalSpeed { get { return normalSpeed; } private set { normalSpeed = Mathf.Clamp(value, AfraidSpeed, 10); } }
 
-        public MovementModel(int speed)
+        public MovementModel(float normalSpeed)
         {
-            Speed = speed;
+            NormalSpeed = normalSpeed;
+            AfraidSpeed = normalSpeed / 2;
+            CurrentSpeed = normalSpeed;
         }
     }
     

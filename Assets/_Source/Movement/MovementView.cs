@@ -1,4 +1,5 @@
-﻿using Enemies;
+﻿using Core;
+using Enemies;
 using Level;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,12 @@ namespace Movement
 {
     public class MovementView : MonoBehaviour
     {
-        public GameObject CurrentNodeObject { get; private set; }
+        public GameObject CurrentNodeObject;
+        private GameManager gameManager;
         private List<Sprite> sprites;
         private SpriteRenderer spriteRenderer;
-        private MovementModel model;
+        public MovementModel Model { get; private set; }
+        private Animator animator;
         private bool isGhost;
 
         [SerializeField] private Direction direction;
@@ -27,51 +30,39 @@ namespace Movement
             }
         }
 
-        public void Construct(List<Sprite> sprites, SpriteRenderer spriteRenderer, GameObject startingNode, MovementModel model, bool isGhost)
+        public void Construct(List<Sprite> sprites, SpriteRenderer spriteRenderer, GameObject startingNode, MovementModel model, Animator animator, GameManager gameManager, bool isGhost)
         {
             this.sprites = sprites;
             this.spriteRenderer = spriteRenderer;
+            this.animator = animator;
+            this.gameManager = gameManager;
             CurrentNodeObject = startingNode;
-            this.model = model;
-            isConstructed = true;
+            this.Model = model;
             this.isGhost = isGhost;
+            direction = Direction.Null;
+            if(animator!=null) animator.SetInteger("Direction", -1);
+            isConstructed = true;
         }
 
         private void Update()
         {
-            if (!isConstructed) return;
+            if (!isConstructed || !gameManager.GameIsRunning) return;
 
             Node currentNode = CurrentNodeObject.GetComponent<Node>();
 
-            if (LastMovingDirection != direction)
+            if (!isGhost && LastMovingDirection != direction)
             {
-                if (direction == Direction.Up && LastMovingDirection == Direction.Down && currentNode.CanMoveUp)
-                {
-                    CurrentNodeObject = currentNode.NodeUp;
-                    currentNode = CurrentNodeObject.GetComponent<Node>();
-                    LastMovingDirection = direction;
-                }
-                else if (direction == Direction.Right && LastMovingDirection == Direction.Left && currentNode.CanMoveRight)
-                {
-                    CurrentNodeObject = currentNode.NodeRight;
-                    currentNode = CurrentNodeObject.GetComponent<Node>();
-                    LastMovingDirection = direction;
-                }
-                else if (direction == Direction.Down && LastMovingDirection == Direction.Up && currentNode.CanMoveDown)
-                {
-                    CurrentNodeObject = currentNode.NodeDown;
-                    currentNode = CurrentNodeObject.GetComponent<Node>();
-                    LastMovingDirection = direction;
-                }
-                else if (direction == Direction.Left && LastMovingDirection == Direction.Right && currentNode.CanMoveLeft)
-                {
-                    CurrentNodeObject = currentNode.NodeLeft;
-                    currentNode = CurrentNodeObject.GetComponent<Node>();
-                    LastMovingDirection = direction;
-                }
+                CheckForMidMovementChange(Direction.Up, Direction.Down, currentNode.CanMoveUp, currentNode, out Node newCurrentNodeUp);
+                currentNode = newCurrentNodeUp;
+                CheckForMidMovementChange(Direction.Right, Direction.Left, currentNode.CanMoveRight, currentNode, out Node newCurrentNodeRight);
+                currentNode = newCurrentNodeRight;
+                CheckForMidMovementChange(Direction.Down, Direction.Up, currentNode.CanMoveDown, currentNode, out Node newCurrentNodeDown);
+                currentNode = newCurrentNodeDown;
+                CheckForMidMovementChange(Direction.Left, Direction.Right, currentNode.CanMoveLeft, currentNode, out Node newCurrentNodeLeft);
+                currentNode = newCurrentNodeLeft;
             }
 
-            transform.position = Vector2.MoveTowards(transform.position, CurrentNodeObject.transform.position, model.Speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, CurrentNodeObject.transform.position, Model.CurrentSpeed * Time.deltaTime);
 
             if(transform.position.x == CurrentNodeObject.transform.position.x
                 && transform.position.y == CurrentNodeObject.transform.position.y)
@@ -84,15 +75,23 @@ namespace Movement
                 GameObject newNode = currentNode.GetNodeFromDirection(direction);
                 if(newNode != null)
                 {
-                    CurrentNodeObject = newNode;
-                    LastMovingDirection = direction;
+                    if((TryGetComponent(out EnemyHandler enemyHandler) && enemyHandler.GhostNodeState != GhostNodeState.MovingInNodes && newNode.GetComponent<Node>().IsGhostNode) 
+                        || !newNode.GetComponent<Node>().IsGhostNode)
+                    {
+                        CurrentNodeObject = newNode;
+                        LastMovingDirection = direction;
+                    }
                 }
                 else
                 {
                     newNode = currentNode.GetNodeFromDirection(LastMovingDirection);
                     if (newNode != null)
                     {
-                        CurrentNodeObject = newNode;
+                        if((TryGetComponent(out EnemyHandler enemyHandler) && enemyHandler.GhostNodeState != GhostNodeState.MovingInNodes && newNode.GetComponent<Node>().IsGhostNode) 
+                            || !newNode.GetComponent<Node>().IsGhostNode)
+                        {
+                            CurrentNodeObject = newNode;
+                        }
                     }
                 }
             }
@@ -103,24 +102,45 @@ namespace Movement
             direction = newDirection;
         }
 
+        public void ChangeMovementSpeed(float speed)
+        {
+            Model.CurrentSpeed = speed;
+        }
+
+        public void CheckForMidMovementChange(Direction neededDirection, Direction lastDirection, bool neededCellIsPossible, Node currentNode, out Node newCurrentNode)
+        {
+            newCurrentNode = CurrentNodeObject.GetComponent<Node>();
+            if (direction == neededDirection && lastMovingDirection == lastDirection && neededCellIsPossible)
+            {
+                switch(neededDirection)
+                {
+                    case Direction.Up:
+                        if(!currentNode.NodeUp.GetComponent<Node>().IsGhostNode)
+                            CurrentNodeObject = currentNode.NodeUp;
+                        break;
+                    case Direction.Right:
+                        if (!currentNode.NodeRight.GetComponent<Node>().IsGhostNode)
+                            CurrentNodeObject = currentNode.NodeRight;
+                        break;
+                    case Direction.Down:
+                        if (!currentNode.NodeDown.GetComponent<Node>().IsGhostNode)
+                            CurrentNodeObject = currentNode.NodeDown;
+                        break;
+                    case Direction.Left:
+                        if (!currentNode.NodeLeft.GetComponent<Node>().IsGhostNode)
+                            CurrentNodeObject = currentNode.NodeLeft;
+                        break;
+                }
+                newCurrentNode = CurrentNodeObject.GetComponent<Node>();
+                LastMovingDirection = direction;
+            }
+        }
+
 
         private void UpdateSprite()
         {
-            switch(LastMovingDirection)
-            {
-                case Direction.Up:
-                    spriteRenderer.sprite = sprites[0];
-                    break;
-                case Direction.Right:
-                    spriteRenderer.sprite = sprites[1];
-                    break;
-                case Direction.Down:
-                    spriteRenderer.sprite = sprites[2];
-                    break;
-                case Direction.Left:
-                    spriteRenderer.sprite = sprites[3];
-                    break;
-            }
+            if (animator == null) spriteRenderer.sprite = sprites[LastMovingDirection.GetHashCode()];
+            else animator.SetInteger("Direction", LastMovingDirection.GetHashCode());
         }
     }
     

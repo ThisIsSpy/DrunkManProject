@@ -1,4 +1,5 @@
-﻿using Movement;
+﻿using Enemies;
+using Movement;
 using Player;
 using Score;
 using Score.Powerups;
@@ -10,6 +11,9 @@ namespace Core
 {
     public class Bootstrapper : MonoBehaviour
     {
+        [Header("Game Manager stuff")]
+        [SerializeField] private GameManager gameManager;
+
         [Header("Player stuff")]
         [SerializeField] private GameObject livesHUD;
         [SerializeField] private GameObject lifeIconPrefab;
@@ -18,6 +22,7 @@ namespace Core
 
         [Header("Score stuff")]
         [SerializeField] private TextMeshProUGUI scoreField;
+        [SerializeField] private int ghostEatingScore;
 
         [Header("Moving stuff")]
         [SerializeField] private InputListener inputListener;
@@ -42,16 +47,17 @@ namespace Core
         private void Start()
         {
             ScoreSetup();
+            PlayerLivesSetup();
+            gameManager.Construct(scoreModel, playerLivesModel, musicSource);
             MovingStuffSetup();
             PowerUpSetup();
-            PlayerLivesSetup();
-            collisionDetector.Construct(playerLivesController);
+            collisionDetector.Construct(playerLivesController, scoreController);
         }
 
         private void ScoreSetup()
         {
             PowerUp[] powerUps = FindObjectsOfType<PowerUp>(true);
-            scoreModel = new(powerUps.Length);
+            scoreModel = new(powerUps.Length, ghostEatingScore);
             scoreView = new(scoreField);
             scoreController = new(scoreModel, scoreView);
         }
@@ -62,17 +68,17 @@ namespace Core
             {
                 entity.Setup();
                 if (entity.IsPlayer) inputListener.Construct(entity.GetController());
+                if (entity.TryGetComponent(out EnemyHandler enemy)) gameManager.AddGhost(enemy);
             }
         }
 
         private void PowerUpSetup()
         {
             PowerUp[] powerUps = FindObjectsOfType<PowerUp>(true);
-            System.Random rnd = new();
             foreach (var powerup in powerUps)
             {
-                PowerUpSO chosenSO = powerUpSOList[rnd.Next(0,powerUpSOList.Count)];
-                powerup.Setup(chosenSO, sfxSource, scoreController);
+                if (powerup.IsPowerPellet) powerup.Setup(powerUpSOList[0], sfxSource, scoreController, gameManager);
+                else powerup.Setup(powerUpSOList[1], sfxSource, scoreController, gameManager);
             }
         }
 

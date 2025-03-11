@@ -1,10 +1,13 @@
-﻿using Movement;
+﻿using Core;
+using Movement;
 using UnityEngine;
 
 namespace Score.Powerups
 {
     public class PowerUp : MonoBehaviour
     {
+        [field: SerializeField] public bool IsPowerPellet { get; private set; } = false;
+        private GameManager gameManager;
         private int scoreGivenOnPickUp;
         private Sprite powerUpSprite;
         private AudioClip pickUpSFX;
@@ -14,7 +17,7 @@ namespace Score.Powerups
         private bool isSetup = false;
         private bool isPickedUp = false;
 
-        public void Setup(PowerUpSO powerUpSO, AudioSource sfxPlayer, ScoreController scoreController)
+        public void Setup(PowerUpSO powerUpSO, AudioSource sfxPlayer, ScoreController scoreController, GameManager gameManager)
         {
             scoreGivenOnPickUp = powerUpSO.ScoreGivenOnPickUp;
             powerUpSprite = powerUpSO.PowerUpSprite;
@@ -23,6 +26,7 @@ namespace Score.Powerups
             spriteRenderer.sprite = powerUpSprite;
             this.sfxPlayer = sfxPlayer;
             this.scoreController = scoreController;
+            this.gameManager = gameManager;
             isSetup = true;
             isPickedUp = false;
             gameObject.transform.rotation = Quaternion.identity;
@@ -33,7 +37,8 @@ namespace Score.Powerups
             if (!isSetup || isPickedUp) return;
             if (collision.gameObject.TryGetComponent(out MovementSetup setup) && setup.IsPlayer)
             {
-                scoreController.InvokeScoreUpdate(scoreGivenOnPickUp);
+                if (IsPowerPellet) gameManager.ActivateAfraidState();
+                scoreController.InvokeScoreUpdate(scoreGivenOnPickUp, true);
                 sfxPlayer.PlayOneShot(pickUpSFX);
                 spriteRenderer.enabled = false;
                 isPickedUp = true;

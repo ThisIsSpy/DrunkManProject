@@ -13,5 +13,10 @@
         {
             view.SetDirection(direction);
         }
+
+        public void InvokeChangeMovementSpeed(float speed)
+        {
+            view.ChangeMovementSpeed(speed);
+        }
     }
 }
