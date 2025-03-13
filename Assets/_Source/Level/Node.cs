@@ -6,6 +6,7 @@ namespace Level
     public class Node : MonoBehaviour
     {
         [field: SerializeField] public bool IsGhostNode { get; private set; } = false;
+        [field: SerializeField] public bool IsWrapNode { get; private set; } = false;
 
         [field: SerializeField] public bool CanMoveLeft { get; private set; } = false;
         [field: SerializeField] public bool CanMoveRight { get; private set; } = false;
@@ -16,6 +17,7 @@ namespace Level
         [field: SerializeField] public GameObject NodeRight { get; private set; }
         [field: SerializeField] public GameObject NodeUp { get; private set; }
         [field: SerializeField] public GameObject NodeDown { get; private set; }
+        [field: SerializeField] public GameObject WrapNode { get; private set; }
 
         [SerializeField] private bool visualizeNodes;
 

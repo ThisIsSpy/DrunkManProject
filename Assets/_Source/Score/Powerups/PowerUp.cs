@@ -1,5 +1,6 @@
 ﻿using Core;
 using Movement;
+using System;
 using UnityEngine;
 
 namespace Score.Powerups
@@ -7,42 +8,58 @@ namespace Score.Powerups
     public class PowerUp : MonoBehaviour
     {
         [field: SerializeField] public bool IsPowerPellet { get; private set; } = false;
+        [field: SerializeField] public bool IsSpawnPoint { get; private set; } = false;
+        [field: SerializeField] public bool IsSpawned { get; private set; } = false;
         private GameManager gameManager;
+        private PowerUpCollectionUI powerUpCollectionUI;
         private int scoreGivenOnPickUp;
         private Sprite powerUpSprite;
         private AudioClip pickUpSFX;
         private SpriteRenderer spriteRenderer;
         private AudioSource sfxPlayer;
         private ScoreController scoreController;
-        private bool isSetup = false;
         private bool isPickedUp = false;
 
-        public void Setup(PowerUpSO powerUpSO, AudioSource sfxPlayer, ScoreController scoreController, GameManager gameManager)
+        public void Construct(AudioSource sfxPlayer, ScoreController scoreController, GameManager gameManager, PowerUpCollectionUI powerUpCollectionUI)
+        {
+            this.sfxPlayer = sfxPlayer;
+            this.scoreController = scoreController;
+            this.gameManager = gameManager;
+            this.powerUpCollectionUI = powerUpCollectionUI;
+            spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.enabled = false;
+        }
+
+        public void Spawn(PowerUpSO powerUpSO)
         {
             scoreGivenOnPickUp = powerUpSO.ScoreGivenOnPickUp;
             powerUpSprite = powerUpSO.PowerUpSprite;
             pickUpSFX = powerUpSO.PickUpSFX;
-            spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteRenderer.enabled = true;
             spriteRenderer.sprite = powerUpSprite;
-            this.sfxPlayer = sfxPlayer;
-            this.scoreController = scoreController;
-            this.gameManager = gameManager;
-            isSetup = true;
+            IsSpawned = true;
             isPickedUp = false;
             gameObject.transform.rotation = Quaternion.identity;
         }
 
         public void OnTriggerEnter2D(Collider2D collision)
         {
-            if (!isSetup || isPickedUp) return;
+            if (!IsSpawned || isPickedUp) return;
             if (collision.gameObject.TryGetComponent(out MovementSetup setup) && setup.IsPlayer)
             {
                 if (IsPowerPellet) gameManager.ActivateAfraidState();
+                if (IsSpawnPoint) 
+                {
+                    powerUpCollectionUI.AddPowerUpToCollection(spriteRenderer.sprite);
+                    SpawnedPowerUpPickedUp?.Invoke();
+                }
                 scoreController.InvokeScoreUpdate(scoreGivenOnPickUp, true);
                 sfxPlayer.PlayOneShot(pickUpSFX);
                 spriteRenderer.enabled = false;
                 isPickedUp = true;
             }
         }
+
+        public event Action SpawnedPowerUpPickedUp;
     }
 }

@@ -33,6 +33,8 @@ namespace Player
                 {
                     Debug.Log("ghost eaten");
                     scoreController.InvokeScoreUpdateFromEatingGhosts();
+                    Color normalGhostColor = enemyHandler.GetComponent<SpriteRenderer>().color;
+                    enemyHandler.GetComponent<SpriteRenderer>().color = new(normalGhostColor.r, normalGhostColor.g, normalGhostColor.b, 0.5f);
                     enemyHandler.IsRespawning = true;
                 }
             }

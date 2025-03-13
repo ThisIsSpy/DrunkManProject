@@ -11,6 +11,11 @@ namespace Settings
         [SerializeField] private AudioMixer audioMixer;
         [SerializeField] private AudioMixMode mixMode;
 
+        private void Awake()
+        {
+            OnChangeSlider(GetComponent<Slider>().value);
+        }
+
         public void OnChangeSlider(float value)
         {
             switch(mixMode)

@@ -72,6 +72,13 @@ namespace Movement
                     GetComponent<EnemyHandler>().OnReachingCenterOfNode(currentNode);
                 }
 
+                if(currentNode.IsWrapNode)
+                {
+                    transform.position = currentNode.WrapNode.transform.position;
+                    CurrentNodeObject = currentNode.WrapNode;
+                    currentNode = CurrentNodeObject.GetComponent<Node>();
+                }
+
                 GameObject newNode = currentNode.GetNodeFromDirection(direction);
                 if(newNode != null)
                 {
@@ -93,6 +100,11 @@ namespace Movement
                             CurrentNodeObject = newNode;
                         }
                     }
+                }
+                if (CurrentNodeObject.GetComponent<Node>().IsGhostNode && !GetComponent<EnemyHandler>().IsRespawning && GetComponent<EnemyHandler>().GhostNodeState == GhostNodeState.MovingInNodes)
+                {
+                    LastMovingDirection = Direction.Up;
+                    direction = Direction.Up;
                 }
             }
         }

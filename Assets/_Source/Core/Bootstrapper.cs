@@ -30,6 +30,8 @@ namespace Core
 
         [Header("Power Up stuff")]
         [SerializeField] private List<PowerUpSO> powerUpSOList;
+        [SerializeField] private PowerUpSpawner powerUpSpawner;
+        [SerializeField] private PowerUpCollectionUI powerUpCollectionUI;
 
         [Header("Audio stuff")]
         [SerializeField] private AudioSource musicSource;
@@ -57,7 +59,12 @@ namespace Core
         private void ScoreSetup()
         {
             PowerUp[] powerUps = FindObjectsOfType<PowerUp>(true);
-            scoreModel = new(powerUps.Length, ghostEatingScore);
+            int spawnPointsCount = 0;
+            foreach (PowerUp powerUp in powerUps)
+            {
+                if(powerUp.IsSpawnPoint) spawnPointsCount++;
+            }
+            scoreModel = new(powerUps.Length - spawnPointsCount, ghostEatingScore);
             scoreView = new(scoreField);
             scoreController = new(scoreModel, scoreView);
         }
@@ -75,11 +82,15 @@ namespace Core
         private void PowerUpSetup()
         {
             PowerUp[] powerUps = FindObjectsOfType<PowerUp>(true);
+            List<PowerUp> powerUpSpawnPoints = new();
             foreach (var powerup in powerUps)
             {
-                if (powerup.IsPowerPellet) powerup.Setup(powerUpSOList[0], sfxSource, scoreController, gameManager);
-                else powerup.Setup(powerUpSOList[1], sfxSource, scoreController, gameManager);
+                powerup.Construct(sfxSource, scoreController, gameManager, powerUpCollectionUI);
+                if (powerup.IsPowerPellet) powerup.Spawn(powerUpSOList[0]);
+                else if (powerup.IsSpawnPoint) powerUpSpawnPoints.Add(powerup);
+                else powerup.Spawn(powerUpSOList[1]);
             }
+            powerUpSpawner.Construct(powerUpSpawnPoints, powerUpSOList);
         }
 
         private void PlayerLivesSetup()

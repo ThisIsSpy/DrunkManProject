@@ -107,6 +107,8 @@ namespace Enemies
                         GhostNodeState = respawnState;
                         GetComponent<MovementView>().ChangeMovementSpeed(GetComponent<MovementView>().Model.NormalSpeed);
                         GetComponent<Collider2D>().enabled = true;
+                        Color normalGhostColor = GetComponent<SpriteRenderer>().color;
+                        GetComponent<SpriteRenderer>().color = new(normalGhostColor.r, normalGhostColor.g, normalGhostColor.b, 1);
                         StartCoroutine(GhostAwakeningCoroutine());
                     }
                     else

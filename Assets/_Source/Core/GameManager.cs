@@ -151,16 +151,25 @@ namespace Core
             }
         }
 
-        public void ReturnEveryoneToStartingPosition()
+        private IEnumerator PlayerDeathCoroutine()
         {
-            GameIsRunning = false;
+            musicPlayer.Stop();
+            yield return new WaitForSeconds(1);
+            Player.transform.rotation = Quaternion.Euler(Player.transform.rotation.eulerAngles.x, Player.transform.rotation.eulerAngles.y, Player.transform.rotation.eulerAngles.z+90);
+            yield return new WaitForSeconds(1);
             Player.GetComponent<MovementSetup>().ReturnToStartingNode();
-            foreach(EnemyHandler handler in ghostList)
+            foreach (EnemyHandler handler in ghostList)
             {
                 handler.GetComponent<MovementSetup>().ReturnToStartingNode();
             }
-            musicPlayer.Stop();
+            Player.transform.rotation = Quaternion.Euler(Player.transform.rotation.eulerAngles.x, Player.transform.rotation.eulerAngles.y, Player.transform.rotation.eulerAngles.z - 90);
             StartCoroutine(GameStartCoroutine());
+        }
+
+        public void ReturnEveryoneToStartingPosition()
+        {
+            GameIsRunning = false;
+            StartCoroutine(PlayerDeathCoroutine());
         }
 
         private void ChangeMusic(AudioClip music)
